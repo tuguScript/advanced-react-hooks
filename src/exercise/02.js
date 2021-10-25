@@ -30,7 +30,7 @@ function asyncReducer(state, action) {
     }
   }
 }
-function useAsync(asyncCallback, dependencies) {
+function useAsync(asyncCallback) {
   const [state, dispatch] = React.useReducer(asyncReducer, {
     status: 'idle',
     data: null,
@@ -42,8 +42,6 @@ function useAsync(asyncCallback, dependencies) {
     if (!promise) {
       return
     }
-    debugger
-    // then you can dispatch and handle the promise etc...
     dispatch({type: 'pending'})
     promise.then(
       data => {
@@ -57,17 +55,18 @@ function useAsync(asyncCallback, dependencies) {
     // 🐨 because of limitations with ESLint, you'll need to ignore
     // the react-hooks/exhaustive-deps rule. We'll fix this in an extra credit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, dependencies)
+  }, [asyncCallback])
   return state
 }
 
 function PokemonInfo({pokemonName}) {
-  const state = useAsync(() => {
+  const asyncCallback = React.useCallback(() => {
     if (!pokemonName) {
       return
     }
     return fetchPokemon(pokemonName)
   }, [pokemonName])
+  const state = useAsync(asyncCallback)
   const {data: pokemon, status, error} = state
 
   switch (status) {
